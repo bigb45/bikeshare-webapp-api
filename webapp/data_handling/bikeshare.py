@@ -52,10 +52,6 @@ def get_city(city):
         city = get_closest_match(city)
         prompt = "did you mean " + city + "?"
         return (city, prompt)
-        # prompt = "did you mean " + city + "?"
-        # ans = prompt_user(prompt, ['yes', 'no'], ['yes', 'no', 'y', 'n'])
-        # if ans == 'n' or ans == 'no':
-        #     return 0
 
 
 def get_filters():
@@ -93,6 +89,6 @@ def load_city_data(city):
     try:
         print('loading data for ', city)
         bikeshare_data = pd.DataFrame(pd.read_csv(CITY_DATA[city]))
-        return bikeshare_data.head()
+        return bikeshare_data.fillna('')
     except Exception as e:
         print("caught error {}".format(e))

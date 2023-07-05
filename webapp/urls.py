@@ -4,5 +4,5 @@ from webapp import views
 
 urlpatterns = [
 
-    path('bikeshare/', views.BikeShareDataAPIView.as_view(), name='bikeshare data')
+    path('bikeshare/', views.BikeShareDataAPIView.as_view(), name='bikeshare')
 ]
