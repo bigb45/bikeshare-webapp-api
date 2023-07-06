@@ -12,8 +12,10 @@ class BikeShareDataAPIView(APIView):
         days = request.GET.get('days').lower().split(',')
         months = request.GET.get('months').lower().split(',')
         city = request.GET.get('city').lower()
-        print(city, months, days, sep=" - ")
-        return Response(load_city_data(city))
+        row_count = int(request.GET.get('count'))
+        # direction = request.GET.get('direction') # sorting is now done on the front end
+        # print(city, months, days, sep=" - ")
+        return Response(load_city_data(city, months, days, row_count))
 
     def post(self, request):
         print("message is", request.data['city name'])

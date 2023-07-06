@@ -85,10 +85,59 @@ def get_filters():
     return day_filter, month_filter
 
 
-def load_city_data(city):
+def format_time(col_name, new_col_name, df, pattern):
+    df[new_col_name] = pd.to_datetime(
+        df[col_name]).dt.time.map(lambda t: t.strftime(pattern))
+    return df[new_col_name]
+
+
+def format_date(col_name, new_col_name, df, pattern):
+    df[new_col_name] = pd.to_datetime(
+        df[col_name]).dt.date.map(lambda t: t.strftime(pattern))
+    return df[new_col_name]
+
+
+def seconds_to_dhm(seconds):
+    days = seconds // 86400
+    hours = (seconds % 86400) // 3600
+    minutes = (seconds % 86400) // 60
+    # return "{} Days, {} Hours and {} Minutes".format(days, hours, minutes)
+
+    return "{} Hours and {} Minutes".format(hours, minutes)
+
+    # FIX THIS AS SOON AS YOU GET BACK
+
+
+def filter_data(df, month_list, day_list):
+    # print("Month is: {}".format(month))
+    df['Start Time'] = pd.to_datetime(df['Start Time'])
+    df['Month'] = df['Start Time'].dt.month
+    df['Weekday'] = df['Start Time'].dt.day_name()
+    df = pd.concat(
+        map(lambda month: df[df['Month'] == (months.index(month)+1)], month_list))
+    df = pd.concat(
+        map(lambda day: df[df['Weekday'] == (day.title())], day_list))
+    df = df.sample(frac=1)
+
+    return df
+
+
+def load_city_data(city, month, day, row_count):
     try:
-        print('loading data for ', city)
-        bikeshare_data = pd.DataFrame(pd.read_csv(CITY_DATA[city]))
-        return bikeshare_data.fillna('')
+        print('loading data for ', city,
+              "filtering by {}, {}".format(month, day))
+        bikeshare_data = pd.DataFrame(
+            pd.read_csv(CITY_DATA[city])).drop("Unnamed: 0", axis=1)
+        bikeshare_data = filter_data(bikeshare_data, month, day)
+        format_date(
+            'Start Time', 'Date', bikeshare_data, '%d/%m/%Y')
+        format_time(
+            'Start Time', 'Start Time', bikeshare_data, '%H:%M')
+        format_time(
+            'End Time', 'End Time', bikeshare_data, '%H:%M')
+        bikeshare_data['Trip Duration'] = bikeshare_data['Trip Duration'].apply(
+            seconds_to_dhm)
+        # print(bikeshare_data.head())
+        return bikeshare_data.fillna('-').head(row_count)
     except Exception as e:
         print("caught error {}".format(e))
