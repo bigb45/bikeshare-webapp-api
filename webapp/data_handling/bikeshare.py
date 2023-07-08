@@ -105,8 +105,6 @@ def seconds_to_dhm(seconds):
 
     return "{} Hours and {} Minutes".format(hours, minutes)
 
-    # FIX THIS AS SOON AS YOU GET BACK
-
 
 def filter_data(df, month_list, day_list):
     # print("Month is: {}".format(month))
@@ -123,21 +121,83 @@ def filter_data(df, month_list, day_list):
 
 
 def load_city_data(city, month, day, row_count):
+    hourly_chart_data = daily_chart_data = None
     try:
         print('loading data for ', city,
               "filtering by {}, {}".format(month, day))
+
         bikeshare_data = pd.DataFrame(
             pd.read_csv(CITY_DATA[city])).drop("Unnamed: 0", axis=1)
+
         bikeshare_data = filter_data(bikeshare_data, month, day)
         format_date(
             'Start Time', 'Date', bikeshare_data, '%d/%m/%Y')
+
+        if city != 'washington':
+            hourly_chart_data = make_hourly_chart_data(
+                bikeshare_data, day, month)
+            daily_chart_data = make_daily_chart_data(
+                bikeshare_data, day, month)
+
         format_time(
             'Start Time', 'Start Time', bikeshare_data, '%H:%M')
         format_time(
             'End Time', 'End Time', bikeshare_data, '%H:%M')
+
         bikeshare_data['Trip Duration'] = bikeshare_data['Trip Duration'].apply(
             seconds_to_dhm)
+
         # print(bikeshare_data.head())
-        return bikeshare_data.fillna('-').head(row_count)
+        if city != 'washington':
+            bikeshare_data['Birth Year'] = bikeshare_data['Birth Year'].astype(
+                str)
+        bikeshare_data['Month'] = bikeshare_data['Month'].astype(str)
+        return bikeshare_data.fillna('-').head(row_count), hourly_chart_data, daily_chart_data
     except Exception as e:
         print("caught error {}".format(e))
+
+
+def make_hourly_chart_data(df, days, months):
+    df['Start Time'] = pd.to_datetime(
+        df['Start Time'])
+    hourly_data = df['Start Time'].dt.hour.value_counts(
+    ).reset_index()
+
+    hourly_data['trip duration'] = (df.groupby(
+        df['Start Time'].dt.hour).mean()//60)['Trip Duration']  # get the trip duration column
+    hourly_data.columns = ['hour', 'rides', 'trip duration']
+    hourly_data = hourly_data.sort_values('hour')
+    hourly_data['hour'] = hourly_data['hour'].astype(str) + ':00'
+
+    chart_title = "# of bikes rented per hour on {}, during {}".format(
+        ', '.join(days), ', '.join(months))
+    label = ["Bikes rented", 'Average time rented']
+    return {'data': hourly_data, 'label': label, 'title': chart_title}
+
+
+def make_daily_chart_data(df, days, months):
+    data = {'day': [], 'rides male': [], 'rides female': []}
+
+    for day in days:
+        weekly_filtered_data = df[df['Weekday'] ==
+                                  day.title()]
+        weekly_filtered_data = df[df['Gender'] == 'Male']
+        total_rides = weekly_filtered_data.groupby(
+            weekly_filtered_data['Start Time'].dt.hour).size().sum()
+        data['day'].append(day)
+        data['rides male'].append(total_rides)
+
+        weekly_filtered_data = df[df['Gender'] == 'Female']
+        total_rides = weekly_filtered_data.groupby(
+            weekly_filtered_data['Start Time'].dt.hour).size().sum()
+        data['rides female'].append(total_rides)
+
+    chart_title = "Total # of bikes rented per day on {}, during {} Male vs Female".format(
+        ', '.join(days), ', '.join(months))
+    label = "Bikes rented"
+    selected_days_total = {'data': data,
+                           'label': label, 'title': chart_title}
+    return selected_days_total
+
+
+# TODO: MALE VS FEMALE CHART, SUBSCRIBER VS CUSTOMER CHART, AGE CHART
