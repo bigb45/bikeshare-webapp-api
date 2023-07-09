@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-m0@=6i))v*a4qzc7-9-)#zd$-lcdk6091qcm8g18lt=qm#lz@-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'bikesharedatawebapp-c7hkdyriba-ez.a.run.app',
+]   
 
 
 # Application definition

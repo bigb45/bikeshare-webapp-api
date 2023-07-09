@@ -1,4 +1,3 @@
-import time
 import pandas as pd
 import numpy as np
 import datetime as dt
@@ -122,42 +121,49 @@ def filter_data(df, month_list, day_list):
 
 def load_city_data(city, month, day, row_count):
     hourly_chart_data = daily_chart_data = None
-    try:
-        print('loading data for ', city,
-              "filtering by {}, {}".format(month, day))
+    # try:
+    print('loading data for ', city,
+            "filtering by {}, {}".format(month, day))
 
-        bikeshare_data = pd.DataFrame(
-            pd.read_csv(CITY_DATA[city])).drop("Unnamed: 0", axis=1)
+    bikeshare_data = pd.DataFrame(
+        pd.read_csv(CITY_DATA[city])).drop("Unnamed: 0", axis=1)
+    
+    print('filtering data')
 
-        bikeshare_data = filter_data(bikeshare_data, month, day)
-        format_date(
-            'Start Time', 'Date', bikeshare_data, '%d/%m/%Y')
+    bikeshare_data = filter_data(bikeshare_data, month, day)
+    format_date(
+        'Start Time', 'Date', bikeshare_data, '%d/%m/%Y')
 
-        if city != 'washington':
-            hourly_chart_data = make_hourly_chart_data(
-                bikeshare_data, day, month)
-            daily_chart_data = make_daily_chart_data(
-                bikeshare_data, day, month)
+    if city != 'washington':
+        hourly_chart_data = make_hourly_chart_data(
+            bikeshare_data, day, month)
+        daily_chart_data = make_daily_chart_data(
+            bikeshare_data, day, month)
 
-        format_time(
-            'Start Time', 'Start Time', bikeshare_data, '%H:%M')
-        format_time(
-            'End Time', 'End Time', bikeshare_data, '%H:%M')
 
-        bikeshare_data['Trip Duration'] = bikeshare_data['Trip Duration'].apply(
-            seconds_to_dhm)
+    print('formatting time')
+    format_time(
+        'Start Time', 'Start Time', bikeshare_data, '%H:%M')
+    format_time(
+        'End Time', 'End Time', bikeshare_data, '%H:%M')
+    print('formatting date')
+    bikeshare_data['Trip Duration'] = bikeshare_data['Trip Duration'].apply(
+        seconds_to_dhm)
 
-        # print(bikeshare_data.head())
-        if city != 'washington':
-            bikeshare_data['Birth Year'] = bikeshare_data['Birth Year'].astype(
-                str)
-        bikeshare_data['Month'] = bikeshare_data['Month'].astype(str)
-        return bikeshare_data.fillna('-').head(row_count), hourly_chart_data, daily_chart_data
-    except Exception as e:
-        print("caught error {}".format(e))
+    # print(bikeshare_data.head())
+    if city != 'washington':
+        bikeshare_data['Birth Year'] = bikeshare_data['Birth Year'].astype(
+            str)
+    print('setting month as string')
+    bikeshare_data['Month'] = bikeshare_data['Month'].astype(str)
+    return bikeshare_data.fillna('-').head(row_count), hourly_chart_data, daily_chart_data
+    # except Exception as e:
+    #     print("caught error {}".format(e))
 
 
 def make_hourly_chart_data(df, days, months):
+    print("starting make_hourly_chart_data")
+
     df['Start Time'] = pd.to_datetime(
         df['Start Time'])
     hourly_data = df['Start Time'].dt.hour.value_counts(
@@ -176,6 +182,7 @@ def make_hourly_chart_data(df, days, months):
 
 
 def make_daily_chart_data(df, days, months):
+    print("starting make_daily_chart_data")
     data = {'day': [], 'rides male': [], 'rides female': []}
 
     for day in days:
