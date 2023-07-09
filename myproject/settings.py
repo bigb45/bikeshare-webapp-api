@@ -29,7 +29,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'bikesharedatawebapp-c7hkdyriba-ez.a.run.app',
-]   
+    '34.91.142.167'
+]
 
 
 # Application definition
