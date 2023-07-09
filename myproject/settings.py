@@ -26,10 +26,8 @@ SECRET_KEY = 'django-insecure-m0@=6i))v*a4qzc7-9-)#zd$-lcdk6091qcm8g18lt=qm#lz@-
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'bikesharedatawebapp-c7hkdyriba-ez.a.run.app',
-    '34.91.142.167'
+    '34.91.142.167',
+    'https://bikeshare-webapp-front.vercel.app/'
 ]
 
 
